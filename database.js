@@ -132,5 +132,13 @@ app.use((err, req, res, next) => {
     res.status(500).send('Something broke!')
   })
 
+  app.all('*', (req, res) => {
+    res.status(404).json({
+      error: 'Invalid endpoint syntax or route not found',
+      message: `The requested URL ${req.originalUrl} is not valid.`
+    });
+  });
+  
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
