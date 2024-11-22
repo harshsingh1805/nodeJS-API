@@ -76,16 +76,21 @@ app.post('/addSchool', async (req, res) => {
 app.get('/listSchools', async (req, res) => {
     const { latitude, longitude } = req.query;
 
+    
+
     if (latitude === undefined || longitude === undefined) {
         return res.status(400).json({ error: 'Latitude and Longitude are required.' });
     }
 
-    const latitudeValidation = latitudeSchema.safeParse(latitude);
+    const lat = parseFloat(latitude);
+    const long = parseFloat(longitude);
+
+    const latitudeValidation = latitudeSchema.safeParse(lat);
     if (!latitudeValidation.success) {
         return res.status(400).json({ error: 'Invalid latitude.' });
     }
     
-    const longitudeValidation = longitudeSchema.safeParse(longitude);
+    const longitudeValidation = longitudeSchema.safeParse(long);
     if (!longitudeValidation.success) {
         return res.status(400).json({ error: 'Invalid longitude.' });
     }
