@@ -1,4 +1,5 @@
-import { Pool } from 'pg';  // Import PostgreSQL client (pg)
+import pkg from 'pg';
+const { Pool } = pkg;  // Import PostgreSQL client (pg)
 import dotenv from 'dotenv';
 import zod from 'zod';
 import express from 'express';
