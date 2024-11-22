@@ -1,5 +1,5 @@
 import pkg from 'pg';
-const { Pool } = pkg;  // Import PostgreSQL client (pg)
+const { Pool } = pkg;  
 import dotenv from 'dotenv';
 import zod from 'zod';
 import express from 'express';
@@ -14,29 +14,11 @@ const addressSchema = zod.string().min(1).max(255);
 const latitudeSchema = zod.number().min(-90).max(90);
 const longitudeSchema = zod.number().min(-180).max(180);
 
-// // PostgreSQL connection pool
-// const pool = new Pool({
-//     host: process.env.DB_HOST,  
-//     port: process.env.DB_PORT || 5432,  
-//     user: process.env.DB_USER, 
-//     password: process.env.DB_PASSWORD,  
-//     database: process.env.DB_NAME, 
-//     ssl: { rejectUnauthorized: false }, 
-// });
-
-// // Check for PostgreSQL connection
-// pool.connect()
-//     .then(() => {
-//         console.log('Connected to PostgreSQL Database');
-//     })
-//     .catch((err) => {
-//         console.error('Error connecting to PostgreSQL:', err.message);
-//     });
 
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,  // Use DATABASE_URL for the connection string
+    connectionString: process.env.DATABASE_URL,  
     ssl: {
-        rejectUnauthorized: false  // Required for connecting to Render's PostgreSQL with SSL
+        rejectUnauthorized: false 
     }
 });
 const schema = fs.readFileSync('./schema.sql', 'utf8');
@@ -48,16 +30,6 @@ pool.query(schema)
   .catch((err) => {
     console.error('Error initializing schema:', err.message);
   });
-
-// // Check for PostgreSQL connection
-// pool.connect()
-//     .then(() => {
-//         console.log('Connected to PostgreSQL Database');
-//     })
-//     .catch((err) => {
-//         console.error('Error connecting to PostgreSQL:', err.message);
-//     });
-
 
 // Add School API
 app.post('/addSchool', async (req, res) => {
@@ -108,11 +80,21 @@ app.get('/listSchools', async (req, res) => {
         return res.status(400).json({ error: 'Latitude and Longitude are required.' });
     }
 
+    const latitudeValidation = latitudeSchema.safeParse(latitude);
+    if (!latitudeValidation.success) {
+        return res.status(400).json({ error: 'Invalid latitude.' });
+    }
+    
+    const longitudeValidation = longitudeSchema.safeParse(longitude);
+    if (!longitudeValidation.success) {
+        return res.status(400).json({ error: 'Invalid longitude.' });
+    }
+
     try {
         const userLat = parseFloat(latitude);
         const userLon = parseFloat(longitude);
 
-        // Fetch schools from PostgreSQL
+        
         const result = await pool.query('SELECT id, name, address, latitude, longitude FROM schools');
 
         const schools = result.rows.map((school) => {
