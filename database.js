@@ -127,5 +127,10 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
     return R * c;
 }
 
+app.use((err, req, res, next) => {
+    console.error(err.stack)
+    res.status(500).send('Something broke!')
+  })
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
