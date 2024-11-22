@@ -3,6 +3,7 @@ const { Pool } = pkg;  // Import PostgreSQL client (pg)
 import dotenv from 'dotenv';
 import zod from 'zod';
 import express from 'express';
+import fs from 'fs';
 dotenv.config();
 
 const app = express();
@@ -13,24 +14,50 @@ const addressSchema = zod.string().min(1).max(255);
 const latitudeSchema = zod.number().min(-90).max(90);
 const longitudeSchema = zod.number().min(-180).max(180);
 
-// PostgreSQL connection pool
-const pool = new Pool({
-    host: process.env.DB_HOST,  
-    port: process.env.DB_PORT || 5432,  
-    user: process.env.DB_USER, 
-    password: process.env.DB_PASSWORD,  
-    database: process.env.DB_NAME, 
-    ssl: { rejectUnauthorized: false }, 
-});
+// // PostgreSQL connection pool
+// const pool = new Pool({
+//     host: process.env.DB_HOST,  
+//     port: process.env.DB_PORT || 5432,  
+//     user: process.env.DB_USER, 
+//     password: process.env.DB_PASSWORD,  
+//     database: process.env.DB_NAME, 
+//     ssl: { rejectUnauthorized: false }, 
+// });
 
-// Check for PostgreSQL connection
-pool.connect()
-    .then(() => {
-        console.log('Connected to PostgreSQL Database');
-    })
-    .catch((err) => {
-        console.error('Error connecting to PostgreSQL:', err.message);
-    });
+// // Check for PostgreSQL connection
+// pool.connect()
+//     .then(() => {
+//         console.log('Connected to PostgreSQL Database');
+//     })
+//     .catch((err) => {
+//         console.error('Error connecting to PostgreSQL:', err.message);
+//     });
+
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,  // Use DATABASE_URL for the connection string
+    ssl: {
+        rejectUnauthorized: false  // Required for connecting to Render's PostgreSQL with SSL
+    }
+});
+const schema = fs.readFileSync('./schema.sql', 'utf8');
+
+pool.query(schema)
+  .then(() => {
+    console.log('Schema initialized successfully');
+  })
+  .catch((err) => {
+    console.error('Error initializing schema:', err.message);
+  });
+
+// // Check for PostgreSQL connection
+// pool.connect()
+//     .then(() => {
+//         console.log('Connected to PostgreSQL Database');
+//     })
+//     .catch((err) => {
+//         console.error('Error connecting to PostgreSQL:', err.message);
+//     });
+
 
 // Add School API
 app.post('/addSchool', async (req, res) => {
